@@ -24,7 +24,7 @@ def preprocess(stdin):
 
 
 def run(stdin):
-    # yield task1(preprocess(stdin))
+    yield task1(preprocess(stdin))
     yield task2(preprocess(stdin))
 
 
