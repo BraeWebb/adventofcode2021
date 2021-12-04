@@ -1,7 +1,7 @@
 from itertools import tee
 
 
-def break_into_parts(sequence, parts=1):
+def windows(sequence, parts=1):
     iters = tee(sequence, parts)
     for i in range(1, parts):
         for each in iters[i:]:

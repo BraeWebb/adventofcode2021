@@ -1,6 +1,7 @@
+""""(*@ \section{Day 4: Binary Diagnostic} @*)"""""
+
 from collections import defaultdict
 import itertools
-import sys
 from typing import Dict, List, Tuple
 from dataclasses import dataclass
 
@@ -9,7 +10,7 @@ from util import *
 
 GRID_SIZE = 5
 
-
+# not happy with this
 @dataclass
 class Board:
     board_number: int
@@ -33,7 +34,10 @@ class Board:
         yield from self.iterate(lambda x, y: self.rows[x][y])
 
     def all(self):
-        yield from itertools.chain(*self.iterate(lambda x, y: (self.rows[x][y], self.marks[(x, y)])))
+        pairs = lambda x, y: (self.rows[x][y], self.marks[(x, y)])
+        yield from itertools.chain(
+            *self.iterate(pairs)
+        )
 
 
 @dataclass
@@ -83,6 +87,9 @@ def preprocess(stdin):
     return Bingo(numbers, boards)
 
 
+""""(*@ \subsection{Task One} @*)"""""
+
+
 def is_won(board: Board):
     horizontal = board.all_marks()
     for row in horizontal:
@@ -125,6 +132,8 @@ def task1(bingo: Bingo):
             return tally_points(winner) * number
 
 
+""""(*@ \subsection{Task Two} @*)"""""
+
 def task2(bingo: Bingo):
     winners = set()
     wins = []
@@ -140,16 +149,4 @@ def task2(bingo: Bingo):
     last_board, last_number = wins[-1]
     return tally_points(last_board) * last_number
 
-
-def run(stdin):
-    # yield task1(preprocess(stdin))
-    # yield task2(preprocess(stdin))
-    yield from ()
-
-
-if __name__ == "__main__":
-    results = run(sys.stdin.read())
-    for result in results:
-        print(result)
-
-    run_tests(globals())
+run(globals())

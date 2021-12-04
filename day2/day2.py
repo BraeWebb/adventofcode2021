@@ -1,49 +1,62 @@
-import sys
+""""(*@ \section{Day 2: Dive!} @*)"""""
+
 from util import *
 
+def preprocess(stdin):
+    """
+    Each line consists of a space seperates action string and number.
+    e.g. forward 10
+    """
+    for line in stdin.splitlines():
+        action, _, amount = line.partition(" ")
+        yield action, int(amount)
+
+""""(*@ \subsection{Task One} 
+
+Goal: Process actions by the rules. Rules:
+\begin{description}
+    \item[forward] increase horizontal by amount.
+    \item[up] decrease depth by amount.
+    \item[down] increase depth by amount.
+\end{description}
+
+Approach: The most reasonable way seems to be iterating commands and acting on a `switch' statement.
+@*)"""""
 
 def task1(commands):
     depth = 0
-    hoz = 0
-    for command in commands:
-        action, _, amount = command.partition(" ")
+    horizontal = 0
+    for action, amount in commands:
         if action == "forward":
-            hoz += int(amount)
+            horizontal += amount
         elif action == "up":
-            depth -= int(amount)
+            depth -= amount
         elif action == "down":
-            depth += int(amount)
-    return hoz * depth
+            depth += amount
+    return horizontal * depth
 
+""""(*@ \subsection{Task Two}
+
+Goal: As with the last task but with different rules. Rules:
+\begin{description}
+    \item[forward] increase horizontal by amount and increase depth by aim times amount.
+    \item[up] decrease aim by amount.
+    \item[down] increase aim by amount.
+\end{description}
+@*)"""""
 
 def task2(commands):
     depth = 0
-    hoz = 0
+    horizontal = 0
     aim = 0
-    for command in commands:
-        action, _, amount = command.partition(" ")
+    for action, amount in commands:
         if action == "forward":
-            hoz += int(amount)
-            depth += aim * int(amount)
+            horizontal += amount
+            depth += aim * amount
         elif action == "up":
-            aim -= int(amount)
+            aim -= amount
         elif action == "down":
-            aim += int(amount)
-    return hoz * depth
+            aim += amount
+    return horizontal * depth
 
-def preprocess(stdin):
-    return stdin.splitlines()
-
-
-def run(stdin):
-    yield task1(preprocess(stdin))
-    yield task2(preprocess(stdin))
-    yield from ()
-
-
-if __name__ == "__main__":
-    results = run(sys.stdin.read())
-    for result in results:
-        print(result)
-
-    run_tests(globals())
+run(globals())

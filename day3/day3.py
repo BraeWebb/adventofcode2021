@@ -1,17 +1,22 @@
-import sys
-from util import *
+""""(*@ \section{Day 3: Binary Diagnostic} @*)"""""
 
 from collections import Counter
 
+from util import *
 
-def equal_list(list):
-    return list.count(list[0]) == len(list)
+def preprocess(stdin):
+    return stdin.splitlines()
+
+""""(*@ \subsection{Task One} @*)"""""
 
 def max_bit(bit_array, tie_value=1):
     rates = Counter(bit_array)
-    if equal_list(list(rates.values())):
+
+    # break a tie
+    if rates["0"] == rates["1"]:
         return tie_value
-    return max((*rates.items(),), key=lambda pair: pair[1])[0]
+    
+    return rates.most_common(1)[0][0]
 
 
 def gamma_rate(lines):
@@ -33,11 +38,12 @@ def task1(lines):
     gamma = byte_array_to_int(gamma_rate(lines))
 
     bit_width = len(bin(gamma)) - 2
-    flipped = flip_bits(gamma, bit_width)
-    epsilon = byte_array_to_int(bin(flipped))
+    epsilon = flip_bits(gamma, bit_width)
 
     return gamma * epsilon
 
+
+""""(*@ \subsection{Task Two} @*)"""""
 
 def oxygen_filter(bits, row):
     most = max_bit(bits, tie_value="1")
@@ -69,20 +75,4 @@ def task2(lines):
 
     return int(oxygen_rating, 2) * int(co2_rating, 2)
 
-
-def preprocess(stdin):
-    return stdin.splitlines()
-
-
-def run(stdin):
-    yield task1(preprocess(stdin))
-    yield task2(preprocess(stdin))
-    yield from ()
-
-
-if __name__ == "__main__":
-    results = run(sys.stdin.read())
-    for result in results:
-        print(result)
-
-    run_tests(globals())
+run(globals())
