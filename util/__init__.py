@@ -6,5 +6,6 @@ __all__ = [
     "break_into_parts",
     "caching_enumerate",
     "convert_sequence",
+    "rotate",
     "run_tests"
 ]

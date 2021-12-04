@@ -8,19 +8,19 @@ def is_empty(file):
     return os.stat(file).st_size == 0
 
 
-def run_test(file, fun):
-    if is_empty(f"{file}.out"):
+def run_test(base, number, fun):
+    if is_empty(f"{base}{number}.out"):
         return
 
-    with open(f"{file}.in") as input:
+    with open(f"{base}.in") as input:
         result = fun(input.read())
     
-    with open(f"{file}.out") as output:
+    with open(f"{base}{number}.out") as output:
         expected = output.read()
 
     assert str(result) == str(expected), f"Expected: '{expected}', got: '{result}'"
 
-    print(f"{file} passed", file=sys.stderr)
+    print(f"{base}{number} passed", file=sys.stderr)
 
 
 def test_task(task_number, state=globals()):
@@ -28,10 +28,10 @@ def test_task(task_number, state=globals()):
     preprocess = state.get("preprocess", lambda stdin: stdin)
 
     # test example
-    run_test(f"example{task_number}", lambda stdin: runner(preprocess(stdin)))
+    run_test(f"example", task_number, lambda stdin: runner(preprocess(stdin)))
 
     # run regression tests
-    run_test(f"task{task_number}", lambda stdin: runner(preprocess(stdin)))
+    run_test(f"task", task_number, lambda stdin: runner(preprocess(stdin)))
     
 
 def run_tests(state):

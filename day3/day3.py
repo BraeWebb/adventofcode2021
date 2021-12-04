@@ -4,10 +4,6 @@ from util import *
 from collections import Counter
 
 
-def rotate(lines):
-    return zip(*lines)
-
-
 def equal_list(list):
     return list.count(list[0]) == len(list)
 
