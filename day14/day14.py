@@ -1,76 +1,123 @@
-""""(*@ \section{Day 13: Transparent Origami} @*)"""""
+""""(*@ \section{Day 14: Extended Polymerization} @*)"""""
 
+from collections import Counter
 from util import *
 
-def read_positions(lines):
-    for line in lines:
-        if line == "":
-            break
-        yield tuple(convert_sequence(line.split(",")))
-
-def read_folds(lines):
-    for fold in lines:
-        direction, _, crease = fold.strip("fold along ").partition("=")
-        yield direction, int(crease)
 
 def preprocess(stdin):
-    lines = iter(stdin.splitlines())
-    
-    return list(read_positions(lines)), list(read_folds(lines))
+    lines = stdin.splitlines()
+    template = lines[0]
+
+    pairs = []
+    for line in lines[2:]:
+        match, _, replace = line.partition(" -> ")
+        pairs.append((match, replace))
+
+    return template, dict(pairs)
 
 """"(*@ \subsection{Task One} @*)"""""
 
-def copy_up(grid, row_no):
-    for x, y in grid:
-        if y > row_no:
-            yield x, row_no - (y - row_no)
+def step(polymer, pairs):
+    for segment in windows(polymer, parts=2):
+        segment = "".join(segment)
+        if segment in pairs:
+            yield segment[0] + pairs[segment]
         else:
-            yield (x, y)
-
-def copy_left(grid, col_no):
-    for x, y in grid:
-        if x > col_no:
-            yield col_no - (x - col_no), y
-        else:
-            yield (x, y)
-
-def grid_string(grid, size):
-    result = ""
-    for x in range(size[1]):
-        for y in range(size[0]):
-            result += "█" if (y, x) in grid else " "
-        result += "\n"
-    return result
-
-
-def simulate(dots, folds):
-    x, y = max(dot[0] for dot in dots) + 1, max(dot[1] for dot in dots) + 1
-
-    for direction, crease in folds:
-        if direction == "x":
-            dots = set(copy_left(dots, crease))
-            x -= x - crease
-        if direction == "y":
-            dots = set(copy_up(dots, crease))
-            y -= y - crease
-
-    return dots, (x, y)
+            yield segment[0]
+    
+    yield polymer[-1]
 
 def task1(lines):
-    points, folds = lines
-    dots = set(points)
-    dots, _ = simulate(dots, folds[:1])
+    """A naive solution which constructs the string."""
+    template, pairs = lines
 
-    return len(dots)
+    polymer = template
+    for _ in range(10):
+        polymer = "".join(list(step(polymer, pairs)))
+    
+    commons = Counter(polymer).most_common()
+
+    return commons[0][1] - commons[-1][1]
 
 
 """"(*@ \subsection{Task Two} @*)"""""
 
-def task2(lines):
-    points, folds = lines
-    dots = set(points)
-    dots, size = simulate(dots, folds)
+"""An overly complicated solution which builds a graph and DFS's to count"""
 
-    return grid_string(dots, size)
+def expand_graph(graph, pairs):
+    for key, value in graph.items():
+        if value is not None:
+            continue
+
+        if key in pairs:
+            insert = pairs[key]
+            left, right = (key[0] + insert, insert + key[1])
+            yield (key, (left, right))
+
+            if left not in graph:
+                yield (left, None)
+            if right not in graph:
+                yield (right, None)
+
+
+def graph_traverser(counter, max):
+    def dfs(graph, node, step):
+        if step == max:
+            counter[node[0]] += 1
+            return
+
+        for neighbour in graph[node]:
+            dfs(graph, neighbour, step + 1)
+
+    return dfs
+
+
+def task2(lines):
+    template, pairs = lines
+
+    start_nodes = ["".join(window) for window in windows(template, parts=2)]
+    graph = {key: None for key in start_nodes}
+
+    for _ in range(10):
+        graph.update(list(expand_graph(graph, pairs)))
+
+    counter = Counter()
+    traverser = graph_traverser(counter, 40)
+
+    for node in start_nodes:
+        traverser(graph, node, 0, counter)
+    
+    counter[template[-1]] += 1 # account for the last character
+
+    commons = counter.most_common()
+
+    return commons[0][1] - commons[-1][1]
+
+# less complex solution :(
+
+def task2(lines):
+    template, pairs = lines
+    
+    start_nodes = ["".join(window) for window in windows(template, parts=2)]
+    pair_totals = Counter(start_nodes)
+
+    for _ in range(40):
+        for key, value in pair_totals.copy().items():
+            left, right = key
+            replace_with = pairs[key]
+
+            pair_totals[key] -= value
+            pair_totals[left + replace_with] += value
+            pair_totals[replace_with + right] += value
+
+    counter = Counter()
+    for key, value in pair_totals.items():
+        counter[key[0]] += value
+    
+    counter[template[-1]] += 1 # account for the last character
+
+    commons = counter.most_common()
+
+    return commons[0][1] - commons[-1][1]
 
 run(globals())
