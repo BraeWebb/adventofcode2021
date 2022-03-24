@@ -1,0 +1,9 @@
+chapter "Advent of Code"
+
+session aoc2021 = "HOL-Library" +
+  options [quick_and_dirty, document = pdf, document_output = "output"]
+  theories
+    day1
+    parsing
+  document_files
+    "root.tex"
